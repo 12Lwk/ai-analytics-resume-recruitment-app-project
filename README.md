@@ -102,5 +102,8 @@
 
 ## 8.0 Deployment
 ### Login Page
+![login_page](./assets/login_page.png)   
 
+### Sign Up Page
+![signup_page](./assets/signup_page.png)   
 ---
