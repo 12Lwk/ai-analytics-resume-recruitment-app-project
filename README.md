@@ -106,4 +106,16 @@
 
 ### 2) Sign Up Page
 ![signup_page](./assets/signup_page.png)   
+
+### 3) Candidates Page
+![candidates_page](./assets/candidates_page.png)   
+
+### 4) Resume Upload Page
+![resume_upload_page](./assets/resume_upload_page.png)   
+
+### 5) Offers
+![offers_page](./assets/offers_page.png)   
+
+### 6) Settings Page
+![settings_page](./assets/settings_page.png)   
 ---
