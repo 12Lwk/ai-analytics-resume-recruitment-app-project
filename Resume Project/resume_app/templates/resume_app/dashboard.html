@@ -1,0 +1,202 @@
+{% extends 'resume_app/base.html' %}
+{% load static %}
+{% block title %}Dashboard - Recruitment System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+        <div class="welcome-content">
+            <h1 class="welcome-title">
+                <i class="bi bi-speedometer2"></i>
+                Welcome back, {{ user.first_name|default:user.username }}!
+            </h1>
+            <p class="welcome-subtitle">Here's what's happening with your recruitment pipeline today</p>
+        </div>
+        <div class="date-time">
+            <div class="current-date" id="currentDate"></div>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="metrics-grid">
+        <div class="metric-card primary">
+            <div class="metric-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value" data-target="{{ total_candidates }}">0</h3>
+                <p class="metric-label">Total Candidates</p>
+                <span class="metric-change positive">+12% this month</span>
+            </div>
+        </div>
+
+        <div class="metric-card success">
+            <div class="metric-icon">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ time_to_hire }}</h3>
+                <p class="metric-label">Avg. Time-to-Hire</p>
+                <span class="metric-change negative">-5% this month</span>
+            </div>
+        </div>
+
+        <div class="metric-card warning">
+            <div class="metric-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value">{{ offer_acceptance_rate }}</h3>
+                <p class="metric-label">Offer Acceptance Rate</p>
+                <span class="metric-change positive">+3% this month</span>
+            </div>
+        </div>
+
+        <div class="metric-card info">
+            <div class="metric-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="metric-content">
+                <h3 class="metric-value" data-target="24">0</h3>
+                <p class="metric-label">Interviews This Week</p>
+                <span class="metric-change positive">+8 scheduled</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Pipeline Section -->
+    <div class="dashboard-grid">
+        <!-- Source Effectiveness Chart -->
+        <div class="dashboard-card chart-card">
+            <div class="card-header">
+                <h3><i class="bi bi-pie-chart"></i> Source Effectiveness</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" title="Refresh">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="sourceChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Pipeline Progress -->
+        <div class="dashboard-card pipeline-card">
+            <div class="card-header">
+                <h3><i class="bi bi-funnel"></i> Recruitment Pipeline</h3>
+            </div>
+            <div class="card-body">
+                <div class="pipeline-stage">
+                    <div class="stage-info">
+                        <span class="stage-label">Applied</span>
+                        <span class="stage-count">{{ pipeline.applied }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill applied" style="width: 60%;"></div>
+                    </div>
+                </div>
+                
+                <div class="pipeline-stage">
+                    <div class="stage-info">
+                        <span class="stage-label">Interviewed</span>
+                        <span class="stage-count">{{ pipeline.interviewed }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill interviewed" style="width: 25%;"></div>
+                    </div>
+                </div>
+                
+                <div class="pipeline-stage">
+                    <div class="stage-info">
+                        <span class="stage-label">Hired</span>
+                        <span class="stage-count">{{ pipeline.hired }}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill hired" style="width: 15%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card activity-card">
+            <div class="card-header">
+                <h3><i class="bi bi-activity"></i> Recent Activity</h3>
+            </div>
+            <div class="card-body">
+                <div class="activity-item">
+                    <div class="activity-icon new">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>New candidate applied for <strong>Frontend Developer</strong></p>
+                        <span class="activity-time">2 minutes ago</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon interview">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>Interview scheduled with <strong>John Doe</strong></p>
+                        <span class="activity-time">1 hour ago</span>
+                    </div>
+                </div>
+                
+                <div class="activity-item">
+                    <div class="activity-icon offer">
+                        <i class="bi bi-envelope-paper"></i>
+                    </div>
+                    <div class="activity-content">
+                        <p>Offer sent to <strong>Sarah Wilson</strong></p>
+                        <span class="activity-time">3 hours ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card actions-card">
+            <div class="card-header">
+                <h3><i class="bi bi-lightning"></i> Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="{% url 'candidates' %}" class="action-btn primary">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Add Candidate</span>
+                    </a>
+                    
+                    <a href="{% url 'interviews' %}" class="action-btn success">
+                        <i class="bi bi-calendar-plus"></i>
+                        <span>Schedule Interview</span>
+                    </a>
+                    
+                    <a href="{% url 'offers' %}" class="action-btn warning">
+                        <i class="bi bi-envelope-plus"></i>
+                        <span>Send Offer</span>
+                    </a>
+                    
+                    <a href="{% url 'candidates' %}" class="action-btn info">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Generate Report</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %} 

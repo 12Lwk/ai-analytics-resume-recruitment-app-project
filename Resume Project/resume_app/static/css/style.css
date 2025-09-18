@@ -1,0 +1,140 @@
+/* Enhanced Base Template Styles */
+
+/* Navbar Improvements */
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.navbar-brand i {
+    color: #ffd700;
+}
+
+/* User Dropdown Styling */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    min-width: 200px;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.dropdown-item.text-danger:hover {
+    background: #fee;
+    color: #dc3545 !important;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* Sidebar Improvements */
+.sidebar {
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: translateX(4px);
+}
+
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.sidebar .nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Main Content Area */
+main {
+    background: #f8f9fa;
+    min-height: calc(100vh - 56px);
+}
+
+/* Responsive Improvements */
+@media (max-width: 767.98px) {
+    .navbar-brand span {
+        font-size: 1rem;
+    }
+    
+    .user-avatar {
+        display: none;
+    }
+    
+    main {
+        padding: 1rem !important;
+    }
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

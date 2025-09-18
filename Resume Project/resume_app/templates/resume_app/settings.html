@@ -1,0 +1,741 @@
+{% extends 'resume_app/base.html' %}
+{% load static %}
+
+{% block title %}Settings - Recruitment System{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-layout">
+    <!-- Settings Sidebar -->
+    <div class="settings-sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Settings</h2>
+            <p class="sidebar-subtitle">Manage your account preferences</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="#profile" class="nav-item active" data-tab="profile">
+                <i class="bi bi-person-circle"></i>
+                Profile Settings
+            </a>
+            <a href="#password" class="nav-item" data-tab="password">
+                <i class="bi bi-shield-lock"></i>
+                Password
+            </a>
+            <a href="#notifications" class="nav-item" data-tab="notifications">
+                <i class="bi bi-bell-fill"></i>
+                Notifications
+            </a>
+            <a href="#verification" class="nav-item" data-tab="verification">
+                <i class="bi bi-patch-check-fill"></i>
+                Verification
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="settings-main">
+        <div class="settings-header">
+            <h1 class="settings-title">Account Settings</h1>
+            <p class="settings-description">Update your personal information and preferences</p>
+        </div>
+
+        <!-- Messages Display -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="content-card">
+            <!-- Profile Settings Tab -->
+            <div id="profile" class="tab-content active">
+                <div class="card-header">
+                    <h3 class="card-title">Profile Information</h3>
+                </div>
+                
+                <div class="card-content">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="profile">
+                        
+                        <!-- Profile Photo -->
+                        <div class="profile-photo-section">
+                            <div class="profile-photo">
+                                <img src="https://via.placeholder.com/80x80/6366f1/ffffff?text=👤" alt="Profile Photo">
+                                <div class="photo-overlay" onclick="handlePhotoUpload()">
+                                    <i class="bi bi-camera-fill"></i>
+                                </div>
+                            </div>
+                            <div class="photo-actions">
+                                <button type="button" class="btn btn-primary" onclick="handlePhotoUpload()">
+                                    <i class="bi bi-cloud-upload-fill me-2"></i>Upload New
+                                </button>
+                                <button type="button" class="btn btn-secondary">
+                                    <i class="bi bi-trash-fill me-2"></i>Remove
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    First Name <span class="required">*</span>
+                                </label>
+                                <input type="text" name="first_name" value="{{ user_data.first_name|default:'' }}" 
+                                    class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Last Name <span class="required">*</span>
+                                </label>
+                                <input type="text" name="last_name" value="{{ user_data.last_name|default:'' }}" 
+                                    class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" value="{{ user_data.email|default:'' }}" 
+                                    class="form-input" readonly>
+                            </div> 
+                        </div>                  
+
+                        <!-- Professional Information Section -->
+                        <div class="section-header">
+                            <h4 class="section-title">Professional Information</h4>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Role</label>
+                                <input type="text" name="role" value="{{ user_data.role|default:'Not Assigned' }}"
+                                    class="form-input role-input" readonly title="Role is assigned by administrator">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Company</label>
+                                <input type="text" name="company" value="{{ user_data.company|default:'' }}"
+                                    class="form-input" readonly title="Company is set during registration">
+                            </div>
+                        </div>
+
+                        <!-- Location & Device Information Section -->
+                        <div class="section-header">
+                            <h4 class="section-title">Location & Device Information</h4>
+                            <p class="section-subtitle">Your location and device information will be automatically detected</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Location
+                                <span class="auto-detect-badge">Auto-detecting...</span>
+                            </label>
+                            <textarea name="address" class="form-textarea" id="address-field"
+                                    placeholder="Your location will be automatically detected..." readonly>{{ user_data.profile.location|default:'' }}</textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Device Information
+                                    <span class="auto-detect-badge">Auto-detecting...</span>
+                                </label>
+                                <textarea name="device_info" class="form-textarea" id="device-info-field"
+                                        placeholder="Device information will be automatically detected..." readonly></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Browser Information
+                                    <span class="auto-detect-badge">Auto-detecting...</span>
+                                </label>
+                                <textarea name="browser_info" class="form-textarea" id="browser-info-field"
+                                        placeholder="Browser information will be automatically detected..." readonly></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary">
+                                <i class="bi bi-x-circle-fill me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle-fill me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Password Tab -->
+            <div id="password" class="tab-content">
+                <div class="card-header">
+                    <h3 class="card-title">Change Password</h3>
+                    <p class="card-subtitle">Update your account password for better security</p>
+                </div>
+                <div class="card-content">
+                    <form method="post" id="password-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="password">
+
+                        <div class="password-security-info">
+                            <div class="security-icon">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <div class="security-text">
+                                <h4>Password Security</h4>
+                                <p>Choose a strong password to keep your account secure. Your password should be at least 8 characters long.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Current Password <span class="required">*</span>
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input type="password" name="current_password" class="form-input password-input"
+                                       placeholder="Enter your current password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    New Password <span class="required">*</span>
+                                </label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" name="new_password" class="form-input password-input"
+                                           placeholder="Enter new password" required minlength="8" id="new-password">
+                                    <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength" id="password-strength">
+                                    <div class="strength-bar">
+                                        <div class="strength-fill"></div>
+                                    </div>
+                                    <span class="strength-text">Password strength</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Confirm New Password <span class="required">*</span>
+                                </label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" name="confirm_password" class="form-input password-input"
+                                           placeholder="Confirm new password" required minlength="8" id="confirm-password">
+                                    <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-match" id="password-match"></div>
+                            </div>
+                        </div>
+
+                        <div class="password-requirements">
+                            <h5>Password Requirements:</h5>
+                            <ul>
+                                <li id="req-length">At least 8 characters long</li>
+                                <li id="req-uppercase">Contains uppercase letter</li>
+                                <li id="req-lowercase">Contains lowercase letter</li>
+                                <li id="req-number">Contains number</li>
+                                <li id="req-special">Contains special character</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="resetPasswordForm()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="change-password-btn">
+                                <i class="bi bi-shield-check me-2"></i>Change Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div id="notifications" class="tab-content">
+                <div class="card-header">
+                    <h3 class="card-title">Notification Preferences</h3>
+                    <p class="card-subtitle">Manage how and when you receive notifications</p>
+                </div>
+                <div class="card-content">
+                    <form method="post" id="notifications-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="notifications">
+
+                        <!-- Email Notifications Section -->
+                        <div class="section-header">
+                            <h4 class="section-title">Email Notifications</h4>
+                            <p class="section-subtitle">Choose which email notifications you'd like to receive</p>
+                        </div>
+
+                        <div class="notification-grid">
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon email">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Email Alerts</h5>
+                                        <p>General system alerts and important updates</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="email_alerts" id="email_alerts"
+                                           {% if user_data.preferences.email_alerts %}checked{% endif %}>
+                                    <label for="email_alerts" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon application">
+                                        <i class="bi bi-person-check-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Application Updates</h5>
+                                        <p>Notifications about candidate applications and status changes</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="application_updates" id="application_updates"
+                                           {% if user_data.preferences.application_updates %}checked{% endif %}>
+                                    <label for="application_updates" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon interview">
+                                        <i class="bi bi-calendar-event-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Interview Reminders</h5>
+                                        <p>Reminders for upcoming interviews and scheduling updates</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="interview_reminders" id="interview_reminders"
+                                           {% if user_data.preferences.interview_reminders %}checked{% endif %}>
+                                    <label for="interview_reminders" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon offer">
+                                        <i class="bi bi-gift-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Offer Notifications</h5>
+                                        <p>Updates about job offers and candidate responses</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="offer_notifications" id="offer_notifications"
+                                           {% if user_data.preferences.offer_notifications %}checked{% endif %}>
+                                    <label for="offer_notifications" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon system">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>System Updates</h5>
+                                        <p>Platform updates, maintenance notifications, and new features</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="system_updates" id="system_updates"
+                                           {% if user_data.preferences.system_updates %}checked{% endif %}>
+                                    <label for="system_updates" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon marketing">
+                                        <i class="bi bi-megaphone-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Marketing Emails</h5>
+                                        <p>Product updates, tips, and promotional content</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="marketing_emails" id="marketing_emails"
+                                           {% if user_data.preferences.marketing_emails %}checked{% endif %}>
+                                    <label for="marketing_emails" class="toggle-switch"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Communication Preferences Section -->
+                        <div class="section-header">
+                            <h4 class="section-title">Communication Preferences</h4>
+                            <p class="section-subtitle">Customize how often and when you receive notifications</p>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Email Frequency</label>
+                                <select name="email_frequency" class="form-input">
+                                    <option value="immediate" {% if user_data.preferences.email_frequency == 'immediate' %}selected{% endif %}>Immediate</option>
+                                    <option value="hourly" {% if user_data.preferences.email_frequency == 'hourly' %}selected{% endif %}>Hourly Digest</option>
+                                    <option value="daily" {% if user_data.preferences.email_frequency == 'daily' %}selected{% endif %}>Daily Digest</option>
+                                    <option value="weekly" {% if user_data.preferences.email_frequency == 'weekly' %}selected{% endif %}>Weekly Digest</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Preferred Notification Time</label>
+                                <input type="time" name="notification_time" class="form-input"
+                                       value="{{ user_data.preferences.notification_time|default:'09:00' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Timezone</label>
+                            <select name="timezone_pref" class="form-input">
+                                <option value="UTC" {% if user_data.preferences.timezone_pref == 'UTC' %}selected{% endif %}>UTC (Coordinated Universal Time)</option>
+                                <option value="EST" {% if user_data.preferences.timezone_pref == 'EST' %}selected{% endif %}>EST (Eastern Standard Time)</option>
+                                <option value="PST" {% if user_data.preferences.timezone_pref == 'PST' %}selected{% endif %}>PST (Pacific Standard Time)</option>
+                                <option value="GMT" {% if user_data.preferences.timezone_pref == 'GMT' %}selected{% endif %}>GMT (Greenwich Mean Time)</option>
+                                <option value="CET" {% if user_data.preferences.timezone_pref == 'CET' %}selected{% endif %}>CET (Central European Time)</option>
+                                <option value="JST" {% if user_data.preferences.timezone_pref == 'JST' %}selected{% endif %}>JST (Japan Standard Time)</option>
+                            </select>
+                        </div>
+
+                        <!-- Mobile Notifications Section -->
+                        <div class="section-header">
+                            <h4 class="section-title">Mobile Notifications</h4>
+                            <p class="section-subtitle">Configure push notifications and SMS alerts</p>
+                        </div>
+
+                        <div class="mobile-notification-section">
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon push">
+                                        <i class="bi bi-phone-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>Push Notifications</h5>
+                                        <p>Receive notifications on your mobile device</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="push_notifications" id="push_notifications"
+                                           {% if user_data.preferences.push_notifications %}checked{% endif %}>
+                                    <label for="push_notifications" class="toggle-switch"></label>
+                                </div>
+                            </div>
+
+                            <div class="notification-item">
+                                <div class="notification-info">
+                                    <div class="notification-icon sms">
+                                        <i class="bi bi-chat-text-fill"></i>
+                                    </div>
+                                    <div class="notification-details">
+                                        <h5>SMS Notifications</h5>
+                                        <p>Receive important alerts via text message</p>
+                                    </div>
+                                </div>
+                                <div class="notification-toggle">
+                                    <input type="checkbox" name="sms_notifications" id="sms_notifications"
+                                           {% if user_data.preferences.sms_notifications %}checked{% endif %}>
+                                    <label for="sms_notifications" class="toggle-switch"></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number (for SMS notifications)</label>
+                            <input type="tel" name="phone_number" class="form-input"
+                                   placeholder="+1 (555) 123-4567"
+                                   value="{{ user_data.profile.phone|default:'' }}">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="resetNotificationForm()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reset to Defaults
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle-fill me-2"></i>Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Verification Tab -->
+            <div id="verification" class="tab-content">
+                <div class="card-header">
+                    <h3 class="card-title">Account Verification</h3>
+                    <p class="card-subtitle">Secure your account with multiple verification methods</p>
+                </div>
+                <div class="card-content">
+                    <!-- Verification Status Overview -->
+                    <div class="verification-overview">
+                        <div class="verification-status-card">
+                            <div class="status-icon verified">
+                                <i class="bi bi-shield-check-fill"></i>
+                            </div>
+                            <div class="status-info">
+                                <h4>Account Security Level</h4>
+                                <div class="security-level">
+                                    <div class="level-bar">
+                                        <div class="level-fill" style="width: 75%"></div>
+                                    </div>
+                                    <span class="level-text">Strong (75%)</span>
+                                </div>
+                                <p>Your account has good security. Consider enabling all verification methods for maximum protection.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Verification Section -->
+                    <div class="section-header">
+                        <h4 class="section-title">Email Verification</h4>
+                        <p class="section-subtitle">Verify your email address to secure your account</p>
+                    </div>
+
+                    <div class="verification-method">
+                        <div class="method-info">
+                            <div class="method-icon email-verify">
+                                <i class="bi bi-envelope-check-fill"></i>
+                            </div>
+                            <div class="method-details">
+                                <h5>Email Address</h5>
+                                <p class="method-value">{{ user_data.email }}</p>
+                                <span class="verification-badge verified">
+                                    <i class="bi bi-check-circle-fill"></i> Verified
+                                </span>
+                            </div>
+                        </div>
+                        <div class="method-actions">
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="verification">
+                                <input type="hidden" name="verification_type" value="email">
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Resend Verification
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Phone Verification Section -->
+                    <div class="section-header">
+                        <h4 class="section-title">Phone Verification</h4>
+                        <p class="section-subtitle">Add your phone number for SMS verification</p>
+                    </div>
+
+                    <div class="verification-method">
+                        <div class="method-info">
+                            <div class="method-icon phone-verify">
+                                <i class="bi bi-phone-fill"></i>
+                            </div>
+                            <div class="method-details">
+                                <h5>Phone Number</h5>
+                                {% if user_data.profile.phone %}
+                                    <p class="method-value">{{ user_data.profile.phone }}</p>
+                                    <span class="verification-badge pending">
+                                        <i class="bi bi-clock-fill"></i> Pending Verification
+                                    </span>
+                                {% else %}
+                                    <p class="method-value text-muted">Not provided</p>
+                                    <span class="verification-badge unverified">
+                                        <i class="bi bi-x-circle-fill"></i> Not Verified
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="method-actions">
+                            <form method="post" class="phone-verification-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="verification">
+                                <input type="hidden" name="verification_type" value="phone">
+                                <div class="phone-input-group">
+                                    <input type="tel" name="phone_number" class="form-input"
+                                           placeholder="+1 (555) 123-4567"
+                                           value="{{ user_data.profile.phone|default:'' }}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-phone me-2"></i>Verify Phone
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Identity Verification Section -->
+                    <div class="section-header">
+                        <h4 class="section-title">Identity Verification</h4>
+                        <p class="section-subtitle">Verify your identity with official documents</p>
+                    </div>
+
+                    <div class="verification-method">
+                        <div class="method-info">
+                            <div class="method-icon identity-verify">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                            <div class="method-details">
+                                <h5>Identity Document</h5>
+                                {% if user_data.verification.identity_status %}
+                                    <p class="method-value">{{ user_data.verification.identity_document_type|title }} - {{ user_data.verification.identity_document_number }}</p>
+                                    {% if user_data.verification.identity_status == 'verified' %}
+                                        <span class="verification-badge verified">
+                                            <i class="bi bi-check-circle-fill"></i> Verified
+                                        </span>
+                                    {% elif user_data.verification.identity_status == 'pending' %}
+                                        <span class="verification-badge pending">
+                                            <i class="bi bi-clock-fill"></i> Under Review
+                                        </span>
+                                    {% else %}
+                                        <span class="verification-badge rejected">
+                                            <i class="bi bi-x-circle-fill"></i> Rejected
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="method-value text-muted">Not submitted</p>
+                                    <span class="verification-badge unverified">
+                                        <i class="bi bi-x-circle-fill"></i> Not Verified
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="method-actions">
+                            <form method="post" class="identity-verification-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="verification">
+                                <input type="hidden" name="verification_type" value="identity">
+                                <div class="identity-input-group">
+                                    <select name="document_type" class="form-input" required>
+                                        <option value="">Select Document Type</option>
+                                        <option value="passport">Passport</option>
+                                        <option value="drivers_license">Driver's License</option>
+                                        <option value="national_id">National ID</option>
+                                        <option value="state_id">State ID</option>
+                                    </select>
+                                    <input type="text" name="document_number" class="form-input"
+                                           placeholder="Document Number" required>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-2"></i>Submit for Review
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Two-Factor Authentication Section -->
+                    <div class="section-header">
+                        <h4 class="section-title">Two-Factor Authentication</h4>
+                        <p class="section-subtitle">Add an extra layer of security to your account</p>
+                    </div>
+
+                    <div class="verification-method">
+                        <div class="method-info">
+                            <div class="method-icon two-factor">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <div class="method-details">
+                                <h5>Two-Factor Authentication</h5>
+                                <p class="method-description">Protect your account with an additional security step during login</p>
+                                {% if user_data.verification.two_factor_enabled %}
+                                    <span class="verification-badge verified">
+                                        <i class="bi bi-check-circle-fill"></i> Enabled
+                                    </span>
+                                    <p class="method-note">Enabled on {{ user_data.verification.two_factor_setup_date|date:"M d, Y" }}</p>
+                                {% else %}
+                                    <span class="verification-badge unverified">
+                                        <i class="bi bi-x-circle-fill"></i> Disabled
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="method-actions">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="verification">
+                                <input type="hidden" name="verification_type" value="two_factor">
+                                {% if user_data.verification.two_factor_enabled %}
+                                    <input type="hidden" name="two_factor_action" value="disable">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-shield-x me-2"></i>Disable 2FA
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="two_factor_action" value="enable">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-shield-check me-2"></i>Enable 2FA
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Backup Codes Section (only show if 2FA is enabled) -->
+                    {% if user_data.verification.two_factor_enabled and user_data.verification.two_factor_backup_codes %}
+                    <div class="backup-codes-section">
+                        <div class="section-header">
+                            <h4 class="section-title">Backup Codes</h4>
+                            <p class="section-subtitle">Save these codes in a safe place. Each code can only be used once.</p>
+                        </div>
+
+                        <div class="backup-codes-container">
+                            <div class="backup-codes-grid">
+                                {% for code in user_data.verification.two_factor_backup_codes %}
+                                    <div class="backup-code">{{ code }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="backup-codes-actions">
+                                <button type="button" class="btn btn-secondary" onclick="downloadBackupCodes()">
+                                    <i class="bi bi-download me-2"></i>Download Codes
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="printBackupCodes()">
+                                    <i class="bi bi-printer me-2"></i>Print Codes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Security Tips -->
+                    <div class="security-tips">
+                        <div class="tips-header">
+                            <i class="bi bi-lightbulb-fill"></i>
+                            <h5>Security Tips</h5>
+                        </div>
+                        <ul class="tips-list">
+                            <li>Enable all verification methods for maximum security</li>
+                            <li>Keep your contact information up to date</li>
+                            <li>Store backup codes in a secure location</li>
+                            <li>Never share your verification codes with anyone</li>
+                            <li>Use a strong, unique password for your account</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/settings.js' %}"></script>
+{% endblock %}
